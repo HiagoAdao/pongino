@@ -6,6 +6,16 @@ O projeto demonstra a comunicação entre potenciômetros conectados a um Arduin
 
 A fonte serial usa streams assíncronos e reconecta à porta configurada após falhas. A fonte mock segue o mesmo contrato assíncrono, permitindo trocar o hardware sem alterar o domínio ou a API.
 
+## Componentes Físicos
+
+![Componentes Físicos](docs/componentes-fisicos.png)
+
+O circuito é composto por um Arduino Uno conectado a dois potenciômetros montados em uma protoboard:
+
+- **Potenciômetro 1 (Jogador 1 - Esquerda):** conectado ao pino analógico `A0`
+- **Potenciômetro 2 (Jogador 2 - Direita):** conectado ao pino analógico `A1`
+- **Alimentação:** pinos `5V` e `GND` do Arduino distribuídos para os barramentos da protoboard
+
 ## Tecnologias
 
 ### Execução
@@ -71,7 +81,6 @@ uv run task test-pots
 Os comandos de qualidade são:
 
 ```bash
-uv run task test
 uv run task lint
 uv run task format
 uv run task type-check
@@ -89,6 +98,8 @@ O servidor registra a inicialização e a finalização da fonte de entrada, ten
 
 ```text
 ├── .env.example
+docs/
+│   └── componentes-fisicos.png
 firmware/
 ├── pong_potenciometros.ino
 pong/
