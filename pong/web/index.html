@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distributed Pong</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="m-0 bg-neutral-950 font-sans text-white scheme-dark">
+  <div class="mx-auto w-[calc(100%-28px)] max-w-[1120px] min-[651px]:w-[calc(100%-64px)]">
+    <header
+      class="flex flex-wrap items-center gap-3 border-b border-neutral-700 py-5 min-[651px]:gap-8 min-[651px]:py-7">
+      <a class="text-[clamp(20px,4vw,32px)] font-black tracking-[-1px] focus-visible:outline-2 focus-visible:outline-offset-4"
+        href="/" aria-label="Pong, início">DISTRIBUTED PONG</a>
+      <div class="ml-auto flex items-center gap-2 font-mono text-[10px]" role="status">
+        <span id="ws-indicator"
+          class="size-1.5 border border-neutral-400 data-[connected=true]:border-white data-[connected=true]:bg-white"></span>
+        <span id="ws-status-text">Conectando...</span>
+      </div>
+    </header>
+    <main>
+      <div
+        class="border-t border-neutral-700 py-6 font-mono text-xs tracking-wide text-neutral-400 flex justify-center">
+        <span>POTENCIÔMETROS OU TECLADO <span class="mx-3 text-neutral-500">/</span>ESPAÇO PARA PAUSAR</span>
+      </div>
+      <section class="relative border border-neutral-600 bg-black" aria-label="Mesa de Pong">
+        <canvas class="block h-auto w-full" id="pongCanvas" width="800" height="500"
+          aria-label="Partida: jogador 1 à esquerda e jogador 2 à direita">Use um navegador com suporte a Canvas para
+          jogar.</canvas>
+        <button id="game-overlay"
+          class="absolute inset-x-[20%] inset-y-[19%] flex cursor-pointer flex-col items-center justify-center bg-black text-white min-[651px]:inset-x-1/4 min-[651px]:inset-y-[24%] focus-visible:outline-2 focus-visible:outline-offset-4"
+          type="button">
+          <span class="font-mono text-[8px] tracking-[2px] text-neutral-400 min-[651px]:text-[10px]"
+            id="overlay-label">PRONTO PARA JOGAR?</span>
+          <span class="border-b border-white my-2 px-1 font-mono text-[9px] tracking-wide min-[651px]:text-[11px]">
+            <span id="overlay-action">INICIAR PARTIDA</span>
+            <span class="ml-5" aria-hidden="true">↗</span>
+          </span>
+          <span class="mt-1 font-mono text-[8px] text-neutral-400 min-[651px]:text-[10px]">Clique aqui ou pressione
+            espaço</span>
+        </button>
+      </section>
+      <section class="grid grid-cols-2 border-b border-neutral-700" aria-label="Controles e posição dos jogadores">
+        <article
+          class="py-[18px] pr-3 even:border-l even:border-neutral-700 even:pr-0 even:pl-3 min-[651px]:py-6 min-[651px]:pr-7 min-[651px]:even:pl-7">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h2 class="text-xs font-normal min-[651px]:text-sm"><span
+                class="mr-2 font-mono text-[11px] text-neutral-400">01</span> Jogador um</h2><output
+              class="font-mono text-sm min-[651px]:text-base" id="p1-percent-text">50.0%</output>
+          </div>
+          <div class="my-[17px] h-0.5 bg-neutral-700">
+            <div id="p1-progress-bar" class="h-full w-1/2 bg-white"></div>
+          </div>
+          <div class="flex flex-col justify-between gap-2 font-mono text-[10px] text-neutral-400 min-[651px]:flex-row">
+            <span>LADO ESQUERDO</span><span><kbd
+                class="mx-1 inline-block min-w-5 border border-neutral-600 p-0.5 text-center text-[11px] text-white">A</kbd>
+              subir <kbd
+                class="mx-1 inline-block min-w-5 border border-neutral-600 p-0.5 text-center text-[11px] text-white">D</kbd>
+              descer</span>
+          </div>
+        </article>
+        <article
+          class="py-[18px] pr-3 even:border-l even:border-neutral-700 even:pr-0 even:pl-3 min-[651px]:py-6 min-[651px]:pr-7 min-[651px]:even:pl-7">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h2 class="text-xs font-normal min-[651px]:text-sm"><span
+                class="mr-2 font-mono text-[11px] text-neutral-400">02</span> Jogador dois</h2><output
+              class="font-mono text-sm min-[651px]:text-base" id="p2-percent-text">50.0%</output>
+          </div>
+          <div class="my-[17px] h-0.5 bg-neutral-700">
+            <div id="p2-progress-bar" class="h-full w-1/2 bg-white"></div>
+          </div>
+          <div class="flex flex-col justify-between gap-2 font-mono text-[10px] text-neutral-400 min-[651px]:flex-row">
+            <span>LADO DIREITO</span><span><kbd
+                class="mx-1 inline-block min-w-5 border border-neutral-600 p-0.5 text-center text-[11px] text-white">↑</kbd>
+              subir <kbd
+                class="mx-1 inline-block min-w-5 border border-neutral-600 p-0.5 text-center text-[11px] text-white">↓</kbd>
+              descer</span>
+          </div>
+        </article>
+      </section>
+      <nav class="flex flex-col items-start justify-between gap-4 py-5 min-[651px]:flex-row min-[651px]:items-center"
+        aria-label="Controles da partida">
+        <span class="font-mono text-[10px] tracking-wide text-neutral-400">ENTRADA <strong
+            class="ml-3 font-normal tracking-normal text-white" id="source-text">Aguardando conexão</strong></span>
+        <div class="flex gap-2">
+          <button
+            class="cursor-pointer border border-neutral-600 px-4 py-2.5 text-[11px] text-neutral-200 hover:border-white hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-4"
+            id="btn-reset" type="button">Reiniciar <span aria-hidden="true">↺</span></button>
+        </div>
+      </nav>
+    </main>
+    <footer class="border-t border-neutral-700 py-6 font-mono text-[9px] tracking-wide text-neutral-400">
+      <!-- <span>POTENCIÔMETROS OU TECLADO <span class="mx-3 text-neutral-500">/</span>ESPAÇO PARA PAUSAR</span> -->
+    </footer>
+  </div>
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+
+</html>

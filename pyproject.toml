@@ -1,0 +1,47 @@
+[project]
+name = "pongino"
+version = "0.1.0"
+description = "Jogo Pong distribuído com Arduino controlado por potenciômetros"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "tornado>=6.4",
+    "pyserial>=3.5",
+    "pydantic-settings>=2.2",
+    "pyserial-asyncio>=0.6",
+]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.33.0",
+    "ruff>=0.8.0",
+    "taskipy>=1.14.0",
+    "rich>=15.0.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "PLC0415"]
+ignore = []
+
+[tool.taskipy.tasks]
+run = "pong-server"
+test-pots = "pong-test-pots"
+test = "pytest tests/ --cov=pong --cov-report=term-missing"
+lint = "ruff check ."
+format = "ruff format ."
+type-check = "basedpyright"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pong*"]
+
+[tool.basedpyright]
+include = ["pong", "tests"]
+exclude = ["**/__pycache__", ".venv", ".pytest_cache", ".ruff_cache"]
+allowedUntypedLibraries = ["serial_asyncio"]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
