@@ -143,9 +143,6 @@ pong/
 └── cli/
     ├── pots.py
     └── server.py
-tests/
-├── integration/api/
-└── unit/
 ```
 
 ## Frontend e Tailwind
