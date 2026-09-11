@@ -1,4 +1,4 @@
-# Pong Retrô Distribuído
+# Pongino
 
 ## Conceito
 
