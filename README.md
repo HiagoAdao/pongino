@@ -1,4 +1,4 @@
-# Pongino
+# 🏓 Pongino
 
 ## Conceito
 
@@ -147,7 +147,7 @@ pong/
 
 ## Frontend e Tailwind
 
-A interface fica em `pong/web/`. O Tornado entrega `web/index.html` em `/` e os módulos JavaScript de `web/static/` em `/static/`. O `package.json` declara os módulos ES e o comando de testes, sem dependências npm.
+A interface fica em `pong/web/`. O Tornado entrega `web/index.html` em `/` e os módulos JavaScript de `web/static/` em `/static/`.
 
 > Este projeto usa o Tailwind Play CDN para simplificar o desenvolvimento e as demonstrações. Os estilos são gerados no navegador e dependem de acesso à internet. Essa abordagem é destinada ao desenvolvimento; para produção, utilize CSS compilado localmente.
 
