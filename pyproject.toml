@@ -30,7 +30,6 @@ ignore = []
 [tool.taskipy.tasks]
 run = "pong-server"
 test-pots = "pong-test-pots"
-test = "pytest tests/ --cov=pong --cov-report=term-missing"
 lint = "ruff check ."
 format = "ruff format ."
 type-check = "basedpyright"
