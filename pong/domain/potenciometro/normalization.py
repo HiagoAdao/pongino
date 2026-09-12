@@ -10,8 +10,9 @@ def normalize_raw_value(raw_value: int | float, raw_min: int, raw_max: int) -> f
         raise ValueError("Valor mínimo deve ser menor que o valor máximo")
     if not raw_min <= raw_value <= raw_max:
         raise ValueError(f"Leitura fora da faixa permitida: {raw_value}")
-    percentage = (float(raw_value) - raw_min * 100.0 / (raw_max - raw_min))
+    percentage = (float(raw_value) - raw_min) * 100.0 / (raw_max - raw_min)
     return clamp(percentage)
+
 
 def adc_to_percent(value: int | float) -> float:
     return normalize_raw_value(value, 0, 1023)
