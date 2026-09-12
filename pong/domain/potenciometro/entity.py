@@ -5,7 +5,7 @@ from pong.domain.potenciometro.normalization import clamp, normalize_raw_value
 from pong.domain.potenciometro.reading import PotenciometroReading
 
 
-dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True)
 class Potenciometro:
     identifier: str
     player: int
@@ -63,5 +63,5 @@ class Potenciometro:
             player=self.player,
             raw_value=None,
             percentage=clamp(percentage),
-            timestamp=timestamp
+            timestamp=timestamp,
         )
