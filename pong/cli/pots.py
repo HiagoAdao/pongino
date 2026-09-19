@@ -7,12 +7,12 @@ from rich.progress_bar import ProgressBar
 from rich.table import Table
 
 from pong.config import Settings
+from pong.domain.pong.state import PongState
 from pong.domain.potenciometro.entity import Potenciometro
-from pong.domain.raquete.state import RaqueteState
 from pong.infra.input.serial.source import SerialInputSource
 
 
-def render_readings(state: RaqueteState | None) -> Table:
+def render_readings(state: PongState | None) -> Table:
     table = Table(title="Diagnóstico dos potenciômetros")
     table.add_column("Jogador")
     table.add_column("Posição")
@@ -46,7 +46,7 @@ async def run() -> None:
         Potenciometro.config(identifier="player1", player=1, pin=settings.pot1_pin),
         Potenciometro.config(identifier="player2", player=2, pin=settings.pot2_pin),
     )
-    samples: SimpleQueue[RaqueteState] = SimpleQueue()
+    samples: SimpleQueue[PongState] = SimpleQueue()
     source = SerialInputSource(
         settings,
         potenciomentros=potenciometros,
@@ -60,7 +60,7 @@ async def run() -> None:
         await source.start()
         with Live(render_readings(None), console=console, auto_refresh=False) as live:
             while True:
-                latest: RaqueteState | None = None
+                latest: PongState | None = None
                 try:
                     while True:
                         latest = samples.get_nowait()

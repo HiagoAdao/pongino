@@ -4,7 +4,7 @@ from pong.domain.potenciometro.reading import PotenciometroReading
 
 
 @dataclass(frozen=True, slots=True)
-class RaqueteState:
+class PongState:
     player_1: PotenciometroReading
     player_2: PotenciometroReading
     timestamp: float

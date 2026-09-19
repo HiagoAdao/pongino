@@ -3,7 +3,7 @@ from logging import getLogger
 from tornado.websocket import WebSocketHandler
 
 from pong.api.websocket.serializer import serialize_paddle_update
-from pong.domain.raquete.state import RaqueteState
+from pong.domain.pong.state import PongState
 
 logger = getLogger(__name__)
 
@@ -23,7 +23,7 @@ class ConnectionManager:
     def remove(self, client: WebSocketHandler):
         self._clients.discard(client)
 
-    def broadcast_state(self, state: RaqueteState):
+    def broadcast_state(self, state: PongState):
         payload = serialize_paddle_update(state)
         for client in tuple(self._clients):
             try:

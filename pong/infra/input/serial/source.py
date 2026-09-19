@@ -7,8 +7,8 @@ from serial import Serial, SerialException
 from serial_asyncio import open_serial_connection
 
 from pong.config import Settings
+from pong.domain.pong.state import PongState
 from pong.domain.potenciometro.entity import Potenciometro
-from pong.domain.raquete.state import RaqueteState
 from pong.infra.input.serial.parser import PotStreamParser
 
 logger = getLogger(__name__)
@@ -19,7 +19,7 @@ class SerialInputSource:
         self,
         settings: Settings,
         potenciomentros: tuple[Potenciometro, Potenciometro],
-        on_update: Callable[[RaqueteState], None],
+        on_update: Callable[[PongState], None],
     ) -> None:
         self._settings = settings
         self._potenciomentros = potenciomentros
@@ -98,11 +98,11 @@ class SerialInputSource:
             if percentuais and self._on_update is not None:
                 self._on_update(self._build_state(percentuais))
 
-    def _build_state(self, percentuais: tuple[float, float]) -> RaqueteState:
+    def _build_state(self, percentuais: tuple[float, float]) -> PongState:
         timestamp = time()
         perc1, perc2 = percentuais
         potentenciometro1, potentenciometro2 = self._potenciomentros
-        return RaqueteState(
+        return PongState(
             timestamp=timestamp,
             player_1=potentenciometro1.reading_from_percentage(perc1, timestamp),
             player_2=potentenciometro2.reading_from_percentage(perc2, timestamp),

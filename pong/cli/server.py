@@ -1,15 +1,15 @@
 import asyncio
+import logging
 import signal
-from logging import getLogger
 
 from pong.api.app import make_app
 from pong.api.websocket.connection_manager import ConnectionManager
 from pong.config import Settings
+from pong.domain.pong.state import PongState
 from pong.domain.potenciometro.entity import Potenciometro
-from pong.domain.raquete.state import RaqueteState
 from pong.infra.input.serial.source import SerialInputSource
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 async def run_server() -> None:
@@ -22,7 +22,7 @@ async def run_server() -> None:
     stop_event = asyncio.Event()
     event_loop = asyncio.get_running_loop()
 
-    def on_paddle_update(state: RaqueteState) -> None:
+    def on_paddle_update(state: PongState) -> None:
         connection_manager.broadcast_state(state)
 
     input_source = SerialInputSource(
@@ -63,6 +63,10 @@ async def run_server() -> None:
 
 
 def main() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    )
     asyncio.run(run_server())
 
 

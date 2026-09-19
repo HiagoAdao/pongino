@@ -1,6 +1,6 @@
 from json import dumps
 
-from pong.domain.raquete.state import RaqueteState
+from pong.domain.pong.state import PongState
 
 
 def serialize_connection_ack(client_count: int) -> str:
@@ -13,7 +13,7 @@ def serialize_connection_ack(client_count: int) -> str:
     )
 
 
-def serialize_paddle_update(state: RaqueteState) -> str:
+def serialize_paddle_update(state: PongState) -> str:
     return dumps(
         {
             "type": "paddle_update",
