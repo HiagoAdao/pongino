@@ -39,8 +39,11 @@ where = ["."]
 include = ["pong*"]
 
 [tool.basedpyright]
-include = ["pong", "tests"]
+include = ["pong"]
 exclude = ["**/__pycache__", ".venv", ".pytest_cache", ".ruff_cache"]
 allowedUntypedLibraries = ["serial_asyncio"]
 typeCheckingMode = "strict"
 pythonVersion = "3.12"
+# O Tornado expõe uma sobrecarga parcialmente tipada para RequestHandler.finish.
+# Não exigir cast apenas para esse tipo externo desconhecido.
+reportUnknownMemberType = "none"

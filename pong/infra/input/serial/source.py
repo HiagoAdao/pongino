@@ -26,7 +26,7 @@ class SerialInputSource:
         self._on_update = on_update
 
         self._connected = False
-        self._task: asyncio.Task | None = None
+        self._task: asyncio.Task[None] | None = None
 
     async def start(self) -> None:
         if self._task is not None and not self._task.done():
