@@ -10,7 +10,7 @@ A fonte serial usa streams assíncronos e tenta reconectar à porta configurada 
 
 Confira uma demonstração de aproximadamente 40 segundos do projeto:
 
-[Assistir à demonstração do Pongino](docs/demo-pongio.mp4)
+https://github.com/user-attachments/assets/ace504d5-78aa-4ed2-83e9-9f8730d2ba52
 
 ## Componentes Físicos
 
