@@ -2,9 +2,9 @@
 
 ## Conceito
 
-O projeto demonstra a comunicação entre potenciômetros conectados a um Arduino e uma interface Pong distribuída por HTTP e WebSocket. A aplicação lê amostras, normaliza os valores para percentuais, cria um estado de domínio para as duas raquetes e publica atualizações em tempo real para os navegadores conectados.
+O projeto demonstra a comunicação entre potenciômetros conectados a um Arduino e uma interface Pong distribuída por HTTP e WebSocket. A aplicação lê amostras pela porta serial, normaliza os valores para percentuais, cria um estado de domínio para as duas raquetes e publica atualizações em tempo real para os navegadores conectados.
 
-A fonte serial usa streams assíncronos e reconecta à porta configurada após falhas. A fonte mock segue o mesmo contrato assíncrono, permitindo trocar o hardware sem alterar o domínio ou a API.
+A fonte serial usa streams assíncronos e tenta reconectar à porta configurada após falhas. O servidor Tornado e a leitura serial compartilham o mesmo event loop do `asyncio`, iniciado por `asyncio.run()`.
 
 ## Componentes Físicos
 
@@ -40,27 +40,49 @@ O circuito é composto por um Arduino Uno conectado a dois potenciômetros monta
 - [Taskipy](https://github.com/taskipy/taskipy)
 - [Rich](https://rich.readthedocs.io/en/stable/)
 
-As ferramentas de desenvolvimento são pytest, pytest-cov, Ruff, Based Pyright, Taskipy e Rich.
-
 ## Como executar
 
 Instale o `uv`, copie `.env.example` para `.env` e substitua todos os placeholders descritivos por valores válidos para o ambiente e o dispositivo utilizado.
 
 ```bash
-cp .env.example .env
 uv sync
+cp .env.example .env
 ```
 
-Para usar o Arduino, configure e informe `PONG_SERIAL_PORT`.
+Mantenha o `.env` diretamente na raiz do projeto, ao lado de `pyproject.toml`.
+O servidor e o `launch.json` carregam especificamente `${workspaceFolder}/.env`.
 
-No macOS, usando a porta serial desta instalação, o `.env` pode conter:
+Para usar o Arduino, configure `PONG_SERIAL_PORT`. Exemplos de portas seriais:
+
+- macOS: `/dev/cu.usbmodemXXXX` ou `/dev/cu.usbserial-XXXX`;
+- Linux: `/dev/ttyACM0` ou `/dev/ttyUSB0`;
+- Windows: `COM3`.
+
+Um `.env` mínimo pode conter:
 
 ```dotenv
-PONG_SERIAL_PORT=/dev/cu.usbserial-RCBB_37NK5Y
+PONG_SERIAL_PORT=/dev/cu.usbmodemXXXX
 PONG_SERIAL_BAUDRATE=115200
+PONG_SERIAL_TIMEOUT_SECONDS=1
+PONG_SERIAL_STARTUP_DELAY_SECONDS=2
+PONG_SERIAL_RECONNECT_DELAY_SECONDS=2
+PONG_POT1_PIN=A0
+PONG_POT2_PIN=A1
+PONG_SERVER_HOST=0.0.0.0
+PONG_SERVER_PORT=8888
 ```
 
 A fonte serial usa `PONG_SERIAL_TIMEOUT_SECONDS` para limitar a espera de cada linha, `PONG_SERIAL_STARTUP_DELAY_SECONDS` para aguardar a inicialização do Arduino e `PONG_SERIAL_RECONNECT_DELAY_SECONDS` para controlar o intervalo entre tentativas.
+
+O parser espera os valores do Arduino na sequência `valor1`, `;`, `valor2`,
+com cada item em uma linha. Os valores analógicos devem estar entre `0` e
+`1023`, por exemplo:
+
+```text
+512
+;
+768
+```
 
 Inicie o servidor:
 
@@ -70,12 +92,23 @@ uv run task run
 
 Acesse `http://localhost:8888` no navegador.
 
+### Debug no VS Code
+
+1. Execute `uv sync` para criar ou atualizar o ambiente virtual.
+2. Selecione o interpretador `.venv` no VS Code.
+3. Abra **Run and Debug**.
+4. Selecione **Python: servidor Pongino** e pressione `F5`.
+
+A configuração em `.vscode/launch.json` executa o módulo `pong.cli.server`, usa
+a raiz do projeto como diretório de trabalho e carrega as variáveis de `.env`.
+Os logs de inicialização ficam visíveis no terminal integrado.
+
 Para acompanhar os potenciômetros no terminal:
 
-O diagnóstico usa Rich com tabela e barras atualizadas em tempo real. Rich pertence ao grupo `dev`, instalado por `uv sync`; esse comando de diagnóstico requer as dependências de desenvolvimento.
+O diagnóstico usa Rich com tabela e barras atualizadas em tempo real. Rich pertence ao grupo `dev`, instalado por `uv sync`; *esse comando deve ser executado sem o servidor principal, pois a porta serial normalmente não pode ser aberta por dois processos ao mesmo tempo*.
 
 ```bash
-uv run task test-pots
+uv run task cli
 ```
 
 Os comandos de qualidade são:
@@ -90,60 +123,106 @@ O comando `type-check` executa o Based Pyright. O lint e a formatação são exe
 
 ## Observabilidade
 
-O endpoint `GET /health` informa o modo de execução, a origem de entrada, o estado da conexão serial ou mock, os pinos configurados e a quantidade de clientes WebSocket conectados.
+O servidor configura o logging no entrypoint e registra a inicialização e a
+finalização da fonte de entrada, tentativas de conexão serial, falhas de
+leitura e conexões WebSocket. O cliente WebSocket atualiza o indicador da
+interface e tenta reconectar com intervalo progressivo quando a conexão é
+encerrada.
 
-O servidor registra a inicialização e a finalização da fonte de entrada, tentativas de conexão serial, falhas de leitura e conexões WebSocket. O cliente WebSocket atualiza o indicador da interface e tenta reconectar com intervalo progressivo quando a conexão é encerrada.
+As rotas principais são:
+
+- `GET /`: página do jogo;
+- `GET /static/...`: arquivos JavaScript e recursos estáticos;
+- `WebSocket /ws`: conexão em tempo real com o estado das raquetes.
+
+Uma mensagem de atualização de raquete tem este formato:
+
+```json
+{
+  "type": "paddle_update",
+  "player1_pct": 50.0,
+  "player2_pct": 75.0,
+  "timestamp": 1710000000.0
+}
+```
 
 ## Estrutura
 
 ```text
+├── .gitignore
 ├── .env.example
-docs/
+├── .vscode/
+│   └── launch.json
+├── AGENTS.md
+├── README.md
+├── docs/
 │   └── componentes-fisicos.png
-firmware/
-├── pong_potenciometros.ino
-pong/
-├── config.py
-├── web/
-│   ├── package.json
-│   ├── index.html
-│   ├── tests/
-│   └── static/
-│       └── js/
-│           ├── dom.js
-│           ├── app.js
-│           ├── game.js
-│           ├── ui.js
-│           └── websocket.js
-├── domain/
-│   ├── paddles/
-│   │   └── state.py
-│   └── potentiometer/
-│       ├── entity.py
-│       ├── normalization.py
-│       └── reading.py
-├── ports/
-│   └── input_source.py
-├── infra/
-│   └── input/
-│       ├── factory.py
-│       ├── mock_source.py
-│       └── serial/
-│           ├── protocol.py
-│           └── source.py
-├── api/
-│   ├── app.py
-│   ├── http/
-│   │   ├── health_handler.py
-│   │   └── index_handler.py
-│   └── websocket/
-│       ├── connection_manager.py
-│       ├── handler.py
-│       └── serializer.py
-└── cli/
-    ├── pots.py
-    └── server.py
+├── pong/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── app.py
+│   │   ├── http/
+│   │   │   ├── __init__.py
+│   │   │   └── index_handler.py
+│   │   └── websocket/
+│   │       ├── __init__.py
+│   │       ├── connection_manager.py
+│   │       ├── handler.py
+│   │       └── serializer.py
+│   ├── cli/
+│   │   ├── __init__.py
+│   │   ├── pots.py
+│   │   └── server.py
+│   ├── domain/
+│   │   ├── __init__.py
+│   │   ├── potenciometro/
+│   │   │   ├── __init__.py
+│   │   │   ├── entity.py
+│   │   │   ├── normalization.py
+│   │   │   └── reading.py
+│   │   └── pong/
+│   │       ├── __init__.py
+│   │       └── state.py
+│   ├── infra/
+│   │   ├── __init__.py
+│   │   └── input/
+│   │       ├── __init__.py
+│   │       └── serial/
+│   │           ├── __init__.py
+│   │           ├── parser.py
+│   │           └── source.py
+│   └── web/
+│       ├── index.html
+│       ├── static/
+│       │   ├── favicon.svg
+│       │   └── js/
+│       │       ├── app.js
+│       │       ├── dom.js
+│       │       ├── game.js
+│       │       ├── ui.js
+│       │       └── websocket.js
+│       └── tests/
+│           ├── game.test.js
+│           ├── ui.test.js
+│           └── websocket.test.js
+├── pyproject.toml
+└── uv.lock
 ```
+
+Arquivos locais como `.env` e diretórios gerados como `.venv/`, `__pycache__/`
+e `.ruff_cache/` não aparecem nessa árvore porque não fazem parte do código
+versionado.
+
+O fluxo da aplicação é:
+
+1. `Settings` carrega as variáveis de ambiente com o prefixo `PONG_`.
+2. `SerialInputSource` lê o Arduino em uma tarefa assíncrona e reconecta após falhas.
+3. `PotStreamParser` valida a sequência serial e transforma valores ADC em percentuais.
+4. O domínio cria um `PongState` para os dois jogadores.
+5. `ConnectionManager` transmite o estado para cada WebSocket conectado.
+6. Os módulos JavaScript atualizam as raquetes e os indicadores da interface.
 
 ## Frontend e Tailwind
 
