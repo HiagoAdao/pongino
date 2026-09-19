@@ -6,6 +6,12 @@ O projeto demonstra a comunicação entre potenciômetros conectados a um Arduin
 
 A fonte serial usa streams assíncronos e tenta reconectar à porta configurada após falhas. O servidor Tornado e a leitura serial compartilham o mesmo event loop do `asyncio`, iniciado por `asyncio.run()`.
 
+## Demonstração
+
+Confira uma demonstração de aproximadamente 40 segundos do projeto:
+
+[Assistir à demonstração do Pongino](docs/demo-pongio.mp4)
+
 ## Componentes Físicos
 
 ![Componentes Físicos](docs/componentes-fisicos.png)
@@ -165,7 +171,8 @@ Uma mensagem de atualização de raquete tem este formato:
 ├── AGENTS.md
 ├── README.md
 ├── docs/
-│   └── componentes-fisicos.png
+│   ├── componentes-fisicos.png
+│   └── demo-pongio.mp4
 ├── test/
 │   ├── conftest.py
 │   ├── test_api.py
