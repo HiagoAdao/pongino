@@ -35,6 +35,8 @@ O circuito é composto por um Arduino Uno conectado a dois potenciômetros monta
 ### Desenvolvimento
 
 - [uv](https://docs.astral.sh/uv/)
+- [pytest](https://docs.pytest.org/en/stable/)
+- [pytest-asyncio](https://pytest-asyncio.readthedocs.io/en/stable/)
 - [Ruff](https://docs.astral.sh/ruff/)
 - [Based Pyright](https://docs.basedpyright.com/latest/)
 - [Taskipy](https://github.com/taskipy/taskipy)
@@ -51,6 +53,9 @@ cp .env.example .env
 
 Mantenha o `.env` diretamente na raiz do projeto, ao lado de `pyproject.toml`.
 O servidor e o `launch.json` carregam especificamente `${workspaceFolder}/.env`.
+O `uv sync` instala o pacote local no ambiente virtual, portanto não é necessário
+definir `PYTHONPATH`. Os comandos Python da aplicação são executados como
+módulos, preservando a raiz do projeto no caminho de importação.
 
 Para usar o Arduino, configure `PONG_SERIAL_PORT`. Exemplos de portas seriais:
 
@@ -114,12 +119,16 @@ uv run task cli
 Os comandos de qualidade são:
 
 ```bash
+uv run task test
 uv run task lint
 uv run task format
 uv run task type-check
 ```
 
-O comando `type-check` executa o Based Pyright. O lint e a formatação são executados pelo Ruff.
+O comando `test` executa os testes Python da pasta `test/` com pytest e exige
+cobertura mínima de 95% (linhas e branches). Os testes assíncronos usam
+pytest-asyncio e não dependem de um Arduino conectado. O comando `type-check`
+executa o Based Pyright. O lint e a formatação são executados pelo Ruff.
 
 ## Observabilidade
 
@@ -157,6 +166,16 @@ Uma mensagem de atualização de raquete tem este formato:
 ├── README.md
 ├── docs/
 │   └── componentes-fisicos.png
+├── test/
+│   ├── conftest.py
+│   ├── test_api.py
+│   ├── test_config.py
+│   ├── test_connection_manager.py
+│   ├── test_domain.py
+│   ├── test_parser.py
+│   ├── test_serial_source.py
+│   ├── test_serialization.py
+│   └── test_server.py
 ├── pong/
 │   ├── __init__.py
 │   ├── config.py

@@ -8,9 +8,15 @@ __pycache__/
 venv/
 ENV/
 
+# Build and packaging
+build/
+dist/
+*.egg-info/
+
 # Testing and coverage
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
 
 # Ruff

@@ -11,9 +11,19 @@ dependencies = [
     "pyserial-asyncio>=0.6",
 ]
 
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pong*"]
+
 [dependency-groups]
 dev = [
     "basedpyright>=1.33.0",
+    "pytest>=9.0",
+    "pytest-asyncio>=1.0",
+    "pytest-cov>=6.0",
     "ruff>=0.8.0",
     "taskipy>=1.14.0",
     "rich>=15.0.0",
@@ -28,15 +38,12 @@ select = ["E", "F", "W", "I", "UP", "B", "PLC0415"]
 ignore = []
 
 [tool.taskipy.tasks]
-run = "python pong/cli/server.py"
-cli = "python pong/cli/pots.py"
+run = "python -m pong.cli.server"
+cli = "python -m pong.cli.pots"
+test = "pytest --cov=pong --cov-branch --cov-report=term-missing --cov-report=xml --cov-fail-under=95"
 lint = "ruff check ."
 format = "ruff format ."
 type-check = "basedpyright"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["pong*"]
 
 [tool.basedpyright]
 include = ["pong"]
@@ -47,3 +54,18 @@ pythonVersion = "3.12"
 # O Tornado expõe uma sobrecarga parcialmente tipada para RequestHandler.finish.
 # Não exigir cast apenas para esse tipo externo desconhecido.
 reportUnknownMemberType = "none"
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["pong"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 95
+precision = 2
+show_missing = true
+exclude_also = ["if __name__ == .__main__.:"]
