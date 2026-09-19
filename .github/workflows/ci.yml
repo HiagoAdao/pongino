@@ -8,8 +8,8 @@ permissions:
   contents: read
 
 jobs:
-  quality:
-    name: Qualidade do código
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -26,8 +26,47 @@ jobs:
       - name: Instalar dependências
         run: uv sync --locked
 
-      - name: Lint
+      - name: Executar lint
         run: uv run task lint
 
-      - name: Type-check
+  type-check:
+    name: Type-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Configurar uv e Python
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Instalar dependências
+        run: uv sync --locked
+
+      - name: Executar type-check
         run: uv run task type-check
+
+  test:
+    name: Testes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Configurar uv e Python
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Instalar dependências
+        run: uv sync --locked
+
+      - name: Executar testes
+        run: uv run task test
