@@ -13,16 +13,6 @@ class Potenciometro:
     raw_min: int = 0
     raw_max: int = 1023
 
-    def __post_init__(self) -> None:
-        if not self.identifier.strip():
-            raise ValueError("O identificador do potenciômetro não pode ser vazio")
-        if self.player < 1:
-            raise ValueError("O jogador do potenciômetro deve ser positivo")
-        if not self.pin.strip():
-            raise ValueError("O pino do potenciômetro não pode ser vazio")
-        if self.raw_min >= self.raw_max:
-            raise ValueError("raw_min deve ser menor que raw_max")
-
     @classmethod
     def config(
         cls,

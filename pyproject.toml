@@ -11,6 +11,9 @@ dependencies = [
     "pyserial-asyncio>=0.6",
 ]
 
+[project.scripts]
+pong-cli = "pong.cli.pots.main"
+
 [dependency-groups]
 dev = [
     "basedpyright>=1.33.0",
@@ -29,7 +32,7 @@ ignore = []
 
 [tool.taskipy.tasks]
 run = "pong-server"
-test-pots = "pong-test-pots"
+cli = "python pong/cli/pots.py"
 lint = "ruff check ."
 format = "ruff format ."
 type-check = "basedpyright"
