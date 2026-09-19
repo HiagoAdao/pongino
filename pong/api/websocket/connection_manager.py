@@ -29,5 +29,5 @@ class ConnectionManager:
             try:
                 client.write_message(payload)
             except Exception as error:
-                logger.error(f"Falha ao enviar estado pelo WebSocket: {error}")
+                logger.error("Falha ao enviar estado pelo WebSocket: %s", error)
                 self._clients.discard(client)

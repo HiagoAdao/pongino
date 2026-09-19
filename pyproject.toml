@@ -11,9 +11,6 @@ dependencies = [
     "pyserial-asyncio>=0.6",
 ]
 
-[project.scripts]
-pong-cli = "pong.cli.pots.main"
-
 [dependency-groups]
 dev = [
     "basedpyright>=1.33.0",
@@ -31,7 +28,7 @@ select = ["E", "F", "W", "I", "UP", "B", "PLC0415"]
 ignore = []
 
 [tool.taskipy.tasks]
-run = "pong-server"
+run = "python pong/cli/server.py"
 cli = "python pong/cli/pots.py"
 lint = "ruff check ."
 format = "ruff format ."

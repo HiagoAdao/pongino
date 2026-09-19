@@ -32,7 +32,7 @@ class SerialInputSource:
         if self._task is not None and not self._task.done():
             return
         self._task = asyncio.create_task(self._run_loop(), name="SerialInputSourceTask")
-        logger.info(f"Fonte serial iniciada na porta {self._settings.serial_port}")
+        logger.info("Fonte serial iniciada na porta %s", self._settings.serial_port)
 
     async def stop(self) -> None:
         task = self._task
@@ -54,15 +54,16 @@ class SerialInputSource:
             try:
                 await self._read_connection()
             except (SerialException, OSError) as err:
-                logger.error(str(err))
+                logger.error("%s", err)
             finally:
                 self._connected = False
             await asyncio.sleep(self._settings.serial_reconnect_delay_seconds)
 
     async def _read_connection(self) -> None:
         logger.info(
-            f"Conectado à porta serial {self._settings.serial_port} a "
-            f"{self._settings.serial_baudrate} bps"
+            "Conectado à porta serial %s a %s bps",
+            self._settings.serial_port,
+            self._settings.serial_baudrate,
         )
         reader, writer = await open_serial_connection(
             url=self._settings.serial_port, baudrate=self._settings.serial_baudrate
