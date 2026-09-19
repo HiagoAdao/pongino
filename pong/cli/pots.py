@@ -1,12 +1,10 @@
 import asyncio
-
 from queue import Empty, SimpleQueue
 
 from rich.console import Console
 from rich.live import Live
 from rich.progress_bar import ProgressBar
 from rich.table import Table
-
 
 from pong.config import Settings
 from pong.domain.potenciometro.entity import Potenciometro
@@ -41,19 +39,12 @@ def render_readings(state: RaqueteState | None) -> Table:
         )
     return table
 
+
 async def run() -> None:
     settings = Settings()
     potenciometros = (
-        Potenciometro.config(
-            identifier="player1",
-            player=1,
-            pin=settings.pot1_pin
-        ),
-        Potenciometro.config(
-            identifier="player2",
-            player=2,
-            pin=settings.pot2_pin
-        ),
+        Potenciometro.config(identifier="player1", player=1, pin=settings.pot1_pin),
+        Potenciometro.config(identifier="player2", player=2, pin=settings.pot2_pin),
     )
     samples: SimpleQueue[RaqueteState] = SimpleQueue()
     source = SerialInputSource(

@@ -2,9 +2,8 @@ from logging import getLogger
 
 from tornado.websocket import WebSocketHandler
 
-from pong.domain.raquete.state import RaqueteState
 from pong.api.websocket.serializer import serialize_paddle_update
-
+from pong.domain.raquete.state import RaqueteState
 
 logger = getLogger(__name__)
 

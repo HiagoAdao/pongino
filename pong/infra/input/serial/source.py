@@ -1,17 +1,15 @@
 import asyncio
-from time import time
-
-from logging import getLogger
 from collections.abc import Callable
-
-from pong.domain.potenciometro.entity import Potenciometro
-from pong.domain.raquete.state import RaqueteState
-from pong.config import Settings
-from pong.infra.input.serial.parser import PotStreamParser
+from logging import getLogger
+from time import time
 
 from serial import Serial, SerialException
 from serial_asyncio import open_serial_connection
 
+from pong.config import Settings
+from pong.domain.potenciometro.entity import Potenciometro
+from pong.domain.raquete.state import RaqueteState
+from pong.infra.input.serial.parser import PotStreamParser
 
 logger = getLogger(__name__)
 
@@ -21,7 +19,7 @@ class SerialInputSource:
         self,
         settings: Settings,
         potenciomentros: tuple[Potenciometro, Potenciometro],
-        on_update: Callable[[RaqueteState], None]
+        on_update: Callable[[RaqueteState], None],
     ) -> None:
         self._settings = settings
         self._potenciomentros = potenciomentros
@@ -33,10 +31,7 @@ class SerialInputSource:
     async def start(self) -> None:
         if self._task is not None and not self._task.done():
             return
-        self._task = asyncio.create_task(
-            self._run_loop(),
-            name="SerialInputSourceTask"
-        )
+        self._task = asyncio.create_task(self._run_loop(), name="SerialInputSourceTask")
         logger.info(f"Fonte serial iniciada na porta {self._settings.serial_port}")
 
     async def stop(self) -> None:
@@ -70,8 +65,7 @@ class SerialInputSource:
             f"{self._settings.serial_baudrate} bps"
         )
         reader, writer = await open_serial_connection(
-            url=self._settings.serial_port,
-            baudrate=self._settings.serial_baudrate
+            url=self._settings.serial_port, baudrate=self._settings.serial_baudrate
         )
         try:
             await asyncio.sleep(self._settings.serial_startup_delay_seconds)

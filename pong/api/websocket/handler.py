@@ -1,9 +1,9 @@
 from logging import getLogger
+
 from tornado.websocket import WebSocketHandler
 
 from pong.api.websocket.connection_manager import ConnectionManager
 from pong.api.websocket.serializer import serialize_connection_ack
-
 
 logger = getLogger(__name__)
 
